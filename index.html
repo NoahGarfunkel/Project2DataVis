@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Interactive map with Leaflet</title>
+    <link rel="icon" href="data:;base64,iVBORwOKGO=" />
+    <link rel="stylesheet" href="css/leaflet.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="my-map"></div>
+    
+    <script src="js/d3.v6.min.js"></script>
+    <script src="js/leaflet.js"></script>
+
+
+    <script src="js/main.js"></script>
+    <script src="js/leafletMap.js"></script>
+
+    <div id="tooltip"></div>
+
+    <p>
+        <label for="color_attr">Choose an Attribute:</label>
+        <select name="color_attr", id="color_attr">
+            <option value="year" label="Year">Year</option>
+            <option value="month" label="Month">Month</option>
+            <option value="time" label="Time">Time</option>
+            <option value="shape" label="Shape">Shape</option>
+        </select>
+    </p>
+
+    <button id="toggleBackground">Toggle Background</button>
+
+</body>
+</html>
