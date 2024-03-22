@@ -18,3 +18,12 @@
   font-size: 10px;
   color: #888;
 }
+
+.chart-area {
+  fill: #e9eff5;
+}
+.chart-line {
+  fill: none;
+  stroke: #517390;
+  stroke-width: 2px;
+}
