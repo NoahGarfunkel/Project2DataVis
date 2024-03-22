@@ -27,7 +27,16 @@ d3.csv('data/ufo_sightings.csv')
     });
     leafletMap.updateColors("year");
     timeline.updateVis();
+
+    const monthlyFrequency = Array.from(d3.rollup(data, v => v.length, d => d.month), ([month, frequency]) => ({month, frequency}));
+
+    monthlyFrequency.sort((a, b) => a.month - b.month);
+    monthBarChart = new BarchartCustomizable ({ parentElement: "#monthBarChart"}, monthlyFrequency)
+    monthBarChart.updateVis();
+
+  
   })
   .catch(error => console.error(error));
+
   
 
