@@ -50,6 +50,16 @@ class BarchartCustomizable {
     
     vis.yAxisG = vis.chart.append('g')
         .attr('class', 'axis y-axis');
+    
+     // Initialize the brush
+    vis.brush = d3.brushX()
+        .extent([[0, 0], [vis.width, vis.height]])
+        .on("brush", vis.brushed.bind(vis));
+
+     // Append the brush to the chart
+    vis.brush = vis.chart.append("g")
+        .attr("class", "brush")
+        .call(vis.brush);
  }
 
  updateVis() {
@@ -94,4 +104,26 @@ class BarchartCustomizable {
         .style('text-anchor', 'end');
     vis.yAxisG.call(vis.yAxis);
  }
+ brushed(event) {
+    let vis = this;
+
+    // Get the selected range
+    const selection = event.selection;
+
+    // Reset all bars to their original color
+    vis.chart.selectAll('.bar')
+        .style('fill', 'steelblue');
+
+    // If there is no selection, exit
+    if (!selection) return;
+
+    // Change the color of bars within the selection
+    vis.chart.selectAll('.bar')
+        .filter(d => {
+            const barX = vis.xScale(d[vis.column]);
+            const barWidth = vis.xScale.bandwidth();
+            return barX + barWidth > selection[0] && barX < selection[1];
+        })
+        .style('fill', 'red');
+}
 }
