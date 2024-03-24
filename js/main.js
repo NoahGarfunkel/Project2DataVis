@@ -37,7 +37,6 @@ d3.csv('data/ufo_sightings.csv')
     const shapeFrequency = Array.from(d3.rollup(data, v => v.length, d => d.ufo_shape), ([shape, frequency]) => ({shape, frequency}));
     shapeFrequency.sort((a, b) => a.shape.localeCompare(b.shape));
 
-    // Initialize and show the bar chart for shape frequency
     const shapeBarChart = new BarchartCustomizable({ parentElement: "#shapeBarChart", containerHeight: 400}, shapeFrequency, "shape");
     shapeBarChart.updateVis();
 
@@ -45,14 +44,9 @@ d3.csv('data/ufo_sightings.csv')
       return date_time.getHours();
      }
      
-    // Group data by the hour of the day and count the occurrences
     const timeOfDayFrequency = Array.from(d3.rollup(data, v => v.length, d => getHourOfDay(d.date_time)), ([hour, frequency]) => ({hour, frequency}));
     timeOfDayFrequency.sort((a, b) => a.hour - b.hour);
      
-    // Log the timeOfDayFrequency data to check if it's correctly processed
-    console.log(timeOfDayFrequency);
-     
-    // Initialize and show the bar chart for time of day frequency
     const timeOfDayBarChart = new BarchartCustomizable({ parentElement: "#timeOfDayBarChart", containerHeight: 300 }, timeOfDayFrequency, "hour");
     timeOfDayBarChart.updateVis();
 
@@ -82,10 +76,6 @@ d3.csv('data/ufo_sightings.csv')
     const encounterLengthFrequency = Array.from(d3.rollup(data, v => v.length, d => assignToBin(d.encounter_length)), ([bin, frequency]) => ({bin, frequency}));
     encounterLengthFrequency.sort((a, b) => binRanges.findIndex(range => range.label === a.bin) - binRanges.findIndex(range => range.label === b.bin));
 
-    // Log the encounterLengthFrequency data to check if it's correctly processed
-    console.log(encounterLengthFrequency);
-
-    // Initialize and show the bar chart for encounter length frequency
     const encounterLengthBarChart = new BarchartCustomizable({ parentElement: "#encounterLengthBarChart", containerHeight: 300 }, encounterLengthFrequency, "bin");
     encounterLengthBarChart.updateVis();
   
