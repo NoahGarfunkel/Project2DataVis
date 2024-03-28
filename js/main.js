@@ -1,8 +1,10 @@
+let filteredData;
+const dispatcher = d3.dispatch('filterVisualizations', 'reset')
+
 d3.csv('data/ufo_sightings.csv')
 .then(data => {
 
     data = data.filter(d => d.latitude !== "NA" && d.longitude !== "NA" && d.ufo_shape !== "NA");
-
     data.forEach(d => {
       d.latitude = +d.latitude; //make sure these are not strings
       d.longitude = +d.longitude; //make sure these are not strings
@@ -11,6 +13,9 @@ d3.csv('data/ufo_sightings.csv')
       d.month = d.date_time.getMonth() + 1;
       d.time = d.date_time.getHours() + d.date_time.getMinutes()/60;
     });
+
+    filteredData = data;
+
     const yearlyFrequency = Array.from(d3.rollup(data, v => v.length, d => d.year), ([year, frequency]) => ({year, frequency}));
     yearlyFrequency.sort((a, b) => a.year - b.year);
     // Initialize chart and then show it
@@ -31,7 +36,7 @@ d3.csv('data/ufo_sightings.csv')
     const monthlyFrequency = Array.from(d3.rollup(data, v => v.length, d => d.month), ([month, frequency]) => ({month, frequency}));
     monthlyFrequency.sort((a, b) => a.month - b.month);
 
-    const monthBarChart = new BarchartCustomizable({ parentElement: "#monthBarChart", containerHeight: 400}, monthlyFrequency, "month");
+    const monthBarChart = new BarchartCustomizable({ parentElement: "#monthBarChart", containerHeight: 400}, monthlyFrequency, "month", dispatcher);
     monthBarChart.updateVis();
 
     const shapeFrequency = Array.from(d3.rollup(data, v => v.length, d => d.ufo_shape), ([shape, frequency]) => ({shape, frequency}));
@@ -81,6 +86,30 @@ d3.csv('data/ufo_sightings.csv')
   
   })
   .catch(error => console.error(error));
+
+  dispatcher.on('filterVisualizations', (selectedSpottings, visualization) => {
+    if (selectedSpottings.length == 0){
+        ResetDataFilter(true);
+    }
+    else {
+        filteredSpottings = selectedSpottings
+        const filteredLocations = filteredData.filter(d => selectedSpottings.some(coord => coord.longitude === d.longitude && coord.latitude === d.latitude));
+        if (visualization !== '#timeline') {
+            timeline.data = filteredLocations
+            timeline.updateVis();
+        }
+
+        if (visualization !== '#monthBarChart') {
+            monthBarChart.updateVis();
+        }
+    }
+})
+
+dispatcher.on('reset', () => {
+    ResetDataFilter(true);
+    timeline.updateVis();
+    monthBarChart.updateVis();
+})
 
   
 

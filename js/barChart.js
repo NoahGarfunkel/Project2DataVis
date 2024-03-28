@@ -1,5 +1,5 @@
 class BarchartCustomizable {
- constructor(_config, _data, _column) {
+ constructor(_config, _data, _column, _dispatcher) {
     this.config = {
       parentElement: _config.parentElement,
       containerWidth: _config.containerWidth || 710,
@@ -10,6 +10,7 @@ class BarchartCustomizable {
     }
     this.data = _data;
     this.column = _column;
+    this.dispatcher = _dispatcher;
     this.initVis();
  }
 
@@ -54,12 +55,19 @@ class BarchartCustomizable {
      // Initialize the brush
     vis.brush = d3.brushX()
         .extent([[0, 0], [vis.width, vis.height]])
-        .on("brush", vis.brushed.bind(vis));
+        .on('brush', function({selection}) {
+            if (selection) vis.BrushMoved(selection);
+          })
+          .on('end', function({selection}) {
+            if (!selection) vis.Brushed(null);
+          });
 
      // Append the brush to the chart
-    vis.brush = vis.chart.append("g")
+    vis.brushG = vis.chart.append("g")
         .attr("class", "brush")
         .call(vis.brush);
+
+    vis.brushTimer = null;
  }
 
  updateVis() {
@@ -104,18 +112,47 @@ class BarchartCustomizable {
         .style('text-anchor', 'end');
     vis.yAxisG.call(vis.yAxis);
  }
- brushed(event) {
+
+BrushMoved(selection) {
+    let vis = this;
+    clearTimeout(vis.brushTimer);
+
+    vis.brushTimer = setTimeout(() => {
+        vis.Brushed(selection);
+    }, 300)
+}
+
+ Brushed(selection) {
     let vis = this;
 
+    clearTimeout(vis.brushTimer);
+
+    console.log(selection)
     // Get the selected range
-    const selection = event.selection;
+
+    if (selection) {
+        const selectionStart = selection[0] - 40;
+const selectionEnd = selection[1] - 40;
+
+const selectedDomainStart = vis.xScale.domain()[Math.floor(selectionStart / vis.xScale.step())];
+const selectedDomainEnd = vis.xScale.domain()[Math.ceil(selectionEnd / vis.xScale.step())];
+
+        const geos = vis.data.filter(d => d[vis.column] >= selectedDomainStart && d[vis.column] <= selectedDomainEnd)
+        const coordinates = geos.map(d => ({ longitude: d.longitude, latitude: d.latitude }));
+        console.log(vis.dispatcher)
+        vis.dispatcher.call('filterVisualizations', vis.event, coordinates, vis.config.parentElement);
+
+        
+    }
 
     // Reset all bars to their original color
     vis.chart.selectAll('.bar')
         .style('fill', 'steelblue');
 
-    // If there is no selection, exit
-    if (!selection) return;
+    if (!selection) {
+        //console.log('end')
+        vis.dispatcher.call('reset', vis.event)
+    }
 
     // Change the color of bars within the selection
     vis.chart.selectAll('.bar')
