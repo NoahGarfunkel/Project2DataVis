@@ -21,7 +21,7 @@ const binRanges = [
 d3.csv('data/ufo_sightings.csv')
 .then(data => {
 
-    data = data.filter(d => d.latitude !== "NA" && d.longitude !== "NA" && d.ufo_shape !== "NA");
+    data = data.filter(d => d.latitude !== "NA" && d.longitude !== "NA" && d.ufo_shape !== "NA" && d.encounter_length>1);
     data.forEach(d => {
       d.latitude = +d.latitude; //make sure these are not strings
       d.longitude = +d.longitude; //make sure these are not strings
@@ -33,7 +33,6 @@ d3.csv('data/ufo_sightings.csv')
     });
 
     data = data.filter(d=>d.year>2000);
-    data = data.filter(d=>d.encounter_length>1);
     selectedOption = "year";
 
     filteredData = data;
@@ -123,6 +122,9 @@ d3.csv('data/ufo_sightings.csv')
             leafletMap.data = filteredDataByMonth;
             leafletMap.updateVis();
             leafletMap.updateColors(selectedOption);
+            shapeBarChart.resetBrush();
+            timeOfDayBarChart.resetBrush();
+            encounterLengthBarChart.resetBrush();
         }
         if (visualization === '#shapeBarChart') {
           filteredDataByShape = filteredData.filter(d => selectedSpottings.some(s => s.shape === d.ufo_shape));
@@ -132,6 +134,9 @@ d3.csv('data/ufo_sightings.csv')
           leafletMap.data = filteredDataByShape;
           leafletMap.updateVis();
           leafletMap.updateColors(selectedOption);
+          monthBarChart.resetBrush();
+          timeOfDayBarChart.resetBrush();
+          encounterLengthBarChart.resetBrush();
         }
         if (visualization === '#timeOfDayBarChart') {
           filteredDataByTime = filteredData.filter(d => selectedSpottings.some(s => s.hour === d.time));
@@ -141,6 +146,9 @@ d3.csv('data/ufo_sightings.csv')
           leafletMap.data = filteredDataByTime;
           leafletMap.updateVis();
           leafletMap.updateColors(selectedOption);
+          monthBarChart.resetBrush();
+          shapeBarChart.resetBrush();
+          encounterLengthBarChart.resetBrush();
         }
 
         function getRangeFromBinLabel(binLabel) {
@@ -159,9 +167,14 @@ d3.csv('data/ufo_sightings.csv')
                 });
             });
             console.log(filteredDataByEncounterLength);
-            filteredDataByEncounterLength = Array.from(d3.rollup(filteredDataByEncounterLength, v => v.length, d => d.year), ([year, frequency]) => ({year, frequency})).sort((a, b) => a.year - b.year);
-            timeline.data = filteredDataByEncounterLength;
+            timeline.data = Array.from(d3.rollup(filteredDataByEncounterLength, v => v.length, d => d.year), ([year, frequency]) => ({year, frequency})).sort((a, b) => a.year - b.year);
             timeline.updateVis();
+            leafletMap.data = filteredDataByEncounterLength;
+            leafletMap.updateVis();
+            leafletMap.updateColors(selectedOption);
+            monthBarChart.resetBrush();
+            shapeBarChart.resetBrush();
+            timeOfDayBarChart.resetBrush();
         }
     }
 })

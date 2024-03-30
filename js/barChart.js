@@ -160,4 +160,9 @@ BrushMoved(selection) {
         })
         .style('fill', 'red');
 }
+
+resetBrush(){
+    this.brush.move(this.brushG, null);
+    this.Brushed(null);
+}
 }
