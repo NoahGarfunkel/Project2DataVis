@@ -103,7 +103,8 @@ class TimeLine {
   
       vis.line = d3.line()
           .x(d => vis.xScale(vis.xValue(d)))
-          .y(d => vis.yScale(vis.yValue(d)));
+          .y(d => vis.yScale(vis.yValue(d)))
+          .curve(d3.curveLinear);
   
       // Set the scale input domains
       vis.xScale.domain(d3.extent(vis.data, vis.xValue));
