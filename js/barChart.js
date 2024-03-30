@@ -117,9 +117,11 @@ BrushMoved(selection) {
     let vis = this;
     clearTimeout(vis.brushTimer);
 
-    vis.brushTimer = setTimeout(() => {
-        vis.Brushed(selection);
-    }, 300)
+    if (selection) {
+        vis.brushTimer = setTimeout(() => {
+            vis.Brushed(selection);
+        }, 300);
+    }
 }
 
  Brushed(selection) {
@@ -127,39 +129,34 @@ BrushMoved(selection) {
 
     clearTimeout(vis.brushTimer);
 
-    console.log(selection)
-    // Get the selected range
-
-    if (selection) {
-        const selectionStart = selection[0] - 40;
-const selectionEnd = selection[1] - 40;
-
-const selectedDomainStart = vis.xScale.domain()[Math.floor(selectionStart / vis.xScale.step())];
-const selectedDomainEnd = vis.xScale.domain()[Math.ceil(selectionEnd / vis.xScale.step())];
-
-        const geos = vis.data.filter(d => d[vis.column] >= selectedDomainStart && d[vis.column] <= selectedDomainEnd)
-        const coordinates = geos.map(d => ({ longitude: d.longitude, latitude: d.latitude }));
-        console.log(vis.dispatcher)
-        vis.dispatcher.call('filterVisualizations', vis.event, coordinates, vis.config.parentElement);
-
-        
+    if (!selection) {
+        // If selection is null, reset the visualization and exit the method
+        vis.dispatcher.call('reset', vis.event);
+        return; // Exit the method early
     }
+
+    const selectionStart = selection[0];
+    const selectionEnd = selection[1];
+
+    const selectedData = vis.data.filter(d => {
+    const barX = vis.xScale(d[vis.column]);
+    const barWidth = vis.xScale.bandwidth();
+    return barX + barWidth > selection[0] && barX < selection[1];
+});
+
+    // Dispatch the selected data
+    vis.dispatcher.call('filterVisualizations', vis.event, selectedData, vis.config.parentElement);
 
     // Reset all bars to their original color
     vis.chart.selectAll('.bar')
         .style('fill', 'steelblue');
-
-    if (!selection) {
-        //console.log('end')
-        vis.dispatcher.call('reset', vis.event)
-    }
 
     // Change the color of bars within the selection
     vis.chart.selectAll('.bar')
         .filter(d => {
             const barX = vis.xScale(d[vis.column]);
             const barWidth = vis.xScale.bandwidth();
-            return barX + barWidth > selection[0] && barX < selection[1];
+        return barX + barWidth > selectionStart && barX < selectionEnd;
         })
         .style('fill', 'red');
 }

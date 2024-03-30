@@ -136,14 +136,14 @@ class TimeLine {
           })
           .on('mousemove', function(event) {
             // Get date that corresponds to current mouse x-coordinate
-            const xPos = d3.pointer(event, this)[0]; // First array element is x, second is y
-            const date = vis.xScale.invert(xPos);
+            let xPos = d3.pointer(event, vis)[0]; // First array element is x, second is y
+            let date = vis.xScale.invert(xPos);
   
             // Find nearest data point
-            const index = vis.bisectDate(vis.data, date, 1);
-            const a = vis.data[index - 1];
-            const b = vis.data[index];
-            const d = b && (date - a.year > b.year - date) ? b : a; 
+            let index = vis.bisectDate(vis.data, date, 1);
+            let a = vis.data[index - 1];
+            let b = vis.data[index];
+            let d = b && (date - a.year > b.year - date) ? b : a; 
   
             // Update tooltip
             vis.tooltip.select('circle')
