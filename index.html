@@ -1,43 +1,57 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Interactive map with Leaflet</title>
-    <link rel="icon" href="data:;base64,iVBORwOKGO=" />
+    <title>Project 2</title>
     <link rel="stylesheet" href="css/leaflet.css">
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+    <div class="header">
+        <h2>The Truth Is Out There!</h2>
+        <p>By Noah Garfunkel, Nick Sucietto, Eric Wolff, Elijah Hoorman
+      </div>
     <p>
-        <label for="color_attr">Choose an Attribute:</label>
+        <label for="color_attr">Color By Attribute:</label>
         <select name="color_attr", id="color_attr">
             <option value="year" label="Year">Year</option>
             <option value="month" label="Month">Month</option>
-            <option value="time" label="Time">Time</option>
-            <option value="shape" label="Shape">Shape</option>
+            <option value="timeOfDay" label="Time">Time</option>
+            <option value="ufo_shape" label="Shape">Shape</option>
         </select>
     </p>
-    <button id="toggleBackground">Toggle Background</button>
 
-    <div id="my-map"></div>
+    <div class="row">
+        <div class="column side"></div>
+        <div class="column middle" id="my-map"></div>
+        <div class="column side"></div>
+    </div>
 
     <div id="timeline_div">
         <svg id="timeline"></svg>
     </div>
 
-    <div id="monthBarChart_div">
-        <svg id="monthBarChart"></svg>
+    <div class="row">
+        <div class="column side"></div>
+        <div class="column half barchart" id="monthBarChart_div">
+            <svg id="monthBarChart"></svg>
+        </div>
+        <div class="column side"></div>
+        <div class="column half barchart" id="shapeBarChart_div">
+            <svg id="shapeBarChart"></svg>
+        </div>
+        <div class="column side"></div>
     </div>
 
-    <div id="shapeBarChart_div">
-        <svg id="shapeBarChart"></svg>
-    </div>
-
-    <div id="timeOfDayBarChart_div">
-        <svg id="timeOfDayBarChart"></svg>
-    </div>
-
-    <div id="encounterLengthBarChart_div">
-        <svg id="encounterLengthBarChart"></svg>
+    <div class="row">
+        <div class="column side"></div>
+        <div class="column half barchart" id="timeOfDayBarChart_div">
+            <svg id="timeOfDayBarChart"></svg>
+        </div>
+        <div class="column side"></div>
+        <div class="column half barchart" id="encounterLengthBarChart_div">
+            <svg id="encounterLengthBarChart"></svg>
+        </div>
+        <div class="column side"></div>
     </div>
     
     <script src="js/d3.v6.min.js"></script>

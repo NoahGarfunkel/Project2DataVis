@@ -1,5 +1,5 @@
 class BarchartCustomizable {
- constructor(_config, _data, _column, _dispatcher) {
+ constructor(_config, _data, _column, _dispatcher, _displayString) {
     this.config = {
       parentElement: _config.parentElement,
       containerWidth: _config.containerWidth || 710,
@@ -11,6 +11,7 @@ class BarchartCustomizable {
     this.data = _data;
     this.column = _column;
     this.dispatcher = _dispatcher;
+    this.displayString = _displayString;
     this.initVis();
  }
 
@@ -43,7 +44,7 @@ class BarchartCustomizable {
         .attr('height', vis.config.containerHeight);
 
     vis.chart = vis.svg.append('g')
-        .attr('transform', `translate(${vis.config.margin.left},${vis.config.margin.top})`);
+        .attr('transform', `translate(${vis.config.margin.left},${vis.config.margin.top + 30})`);
 
     vis.xAxisG = vis.chart.append('g')
         .attr('class', 'axis x-axis')
@@ -68,6 +69,14 @@ class BarchartCustomizable {
         .call(vis.brush);
 
     vis.brushTimer = null;
+
+    var margin = {top: 20, right: 30, bottom: 50, left: 30}
+
+	vis.svg.append("text")
+        .attr("text-anchor", "end")
+        .attr("x", (vis.width / 2) + margin.left)
+        .attr("y", margin.top)
+        .text(this.displayString);
  }
 
  updateVis() {
@@ -99,7 +108,8 @@ class BarchartCustomizable {
                 .style('opacity', 1)
                 .style('left', (event.pageX + 10) + 'px')
                 .style('top', (event.pageY + 10) + 'px')
-                .html(`<div class="tooltip-label">${d[vis.column]}: ${d.frequency}</div>`);
+                .html(`<div class="tooltip-label">${vis.displayString}: ${d[vis.column]}<br>
+                    Frequency: ${d.frequency}</div>`);
         })
         .on('mouseleave', function() {
             // Hide tooltip

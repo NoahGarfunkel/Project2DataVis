@@ -89,7 +89,11 @@ class LeafletMap {
                                 .style('opacity', 1)
                                 .style('z-index', 1000000)
                                   // Format number with million and thousand separator
-                                .html(`<div class="tooltip-label">Latitude: ${d.latitude}, Longitude ${d3.format(',')(d.longitude)}</div>`);
+                                  .html(`<div class="tooltip-label"><strong>Latitude: ${d.latitude}, Longitude ${d3.format(',')(d.longitude)}</strong><br>
+                                    <strong>Location: ${d.city_area}, ${d.country}</strong><br>
+                                    Sighting Date: ${d.month}/${d.day}/${d.year}, Time: ${d.hour}:${d.minutes}<br>
+                                    UFO Shape: ${d.ufo_shape}<br>
+                                    Description: ${d.description}</div>`);
 
                           })
                         .on('mousemove', (event) => {
@@ -160,7 +164,11 @@ class LeafletMap {
                .style('opacity', 1)
                .style('z-index', 1000000)
                  // Format number with million and thousand separator
-               .html(`<div class="tooltip-label">Latitude: ${d.latitude}, Longitude ${d3.format(',')(d.longitude)}</div>`);
+                 .html(`<div class="tooltip-label"><strong>Latitude: ${d.latitude}, Longitude ${d3.format(',')(d.longitude)}</strong><br>
+                    <strong>Location: ${d.city_area}, ${d.country}</strong><br>
+                    Sighting Date: ${d.month}/${d.day}/${d.year}, Time: ${d.hour}:${d.minutes}<br>
+                    UFO Shape: ${d.ufo_shape}<br>
+                    Description: ${d.description}</div>`);
 
          })
        .on('mousemove', (event) => {
@@ -191,6 +199,13 @@ class LeafletMap {
     let vis = this;
     vis.selectedData=colorBy;
 
+    const ShapeScale = d3.scaleOrdinal(
+      ["light", "circle", "triangle", "unknown", "sphere", "fireball", "changing", "chevron", "cigar", "cone",
+        "cross", "cylinder", "diamond", "disk", "egg", "flash", "formation", "other", "rectangle", "teardrop"],
+      ["yellow", "blue", "green", "gray", "red", "orange", "pink", "burlywood", "brown", "dodgerblue",
+        "chocolate", "crimson", "floralwhite", "darkgreen", "gainsboro", "gold", "darkred", "silver", "olive", "cornflowerblue"]
+    )
+
     // Define color scales based on the selected option
     let colorScale;
     switch(colorBy) {
@@ -209,10 +224,8 @@ class LeafletMap {
                       .domain(d3.extent(vis.data, d => d.time))
                       .range(['white', 'blue']);
         break;
-      case 'shape':
-        colorScale = d3.scaleOrdinal()
-                      .domain(vis.data.map(d => d.shape))
-                      .range(d3.schemeCategory20); // Categorical color scheme
+      case 'ufo_shape':
+        colorScale = ShapeScale; // Categorical color scheme
         break;
       default:
         colorScale = d3.scaleOrdinal()
@@ -233,8 +246,8 @@ class LeafletMap {
         return d.month;
       case 'timeOfDay':
         return d.time;
-      case 'shape':
-        return d.shape;
+      case 'ufo_shape':
+        return d.ufo_shape;
       default:
         return 'defaultCategory';
     }

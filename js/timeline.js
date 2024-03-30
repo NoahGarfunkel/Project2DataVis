@@ -90,7 +90,15 @@ class TimeLine {
       vis.tooltip.append('text');
 
       vis.selectedOption = document.getElementById('color_attr').selectedOptions[0];
-    }
+
+      var margin = {top: 20, right: 30, bottom: 50, left: 30}
+
+      vis.svg.append("text")
+            .attr("text-anchor", "end")
+            .attr("x", (vis.width / 2) + 2 * margin.left)
+            .attr("y", margin.top)
+            .text("Timeline");
+        }
   
     /**
      * Prepare the data and scales before we render it.
@@ -152,7 +160,7 @@ class TimeLine {
             
             vis.tooltip.select('text')
                 .attr('transform', `translate(${vis.xScale(d.year)},${(vis.yScale(d.frequency) - 15)})`)
-                .text(`${Math.round(d.frequency)} Sightings, ${d.year}`);
+                .text(`${d.year}: ${Math.round(d.frequency)} Sightings`);
           });
       
       // Update the axes
