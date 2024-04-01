@@ -145,7 +145,7 @@ class TimeLine {
           })
           .on('mousemove', function(event) {
             // Get date that corresponds to current mouse x-coordinate
-            let xPos = d3.pointer(event, vis)[0]; // First array element is x, second is y
+            let xPos = d3.pointer(event, vis)[0] - 325; // First array element is x, second is y
             let date = vis.xScale.invert(xPos);
   
             // Find nearest data point
