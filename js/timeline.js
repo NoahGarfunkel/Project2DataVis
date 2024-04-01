@@ -10,7 +10,7 @@ class TimeLine {
         parentElement: _config.parentElement,
         containerWidth: _config.containerWidth || 800,
         containerHeight: _config.containerHeight || 240,
-        margin: _config.margin || {top: 50, right: 200, bottom: 30, left: 50}
+        margin: _config.margin || {top: 50, right: 50, bottom: 30, left: 50}
       }
       this.data = _data;
       this.initVis();
@@ -22,7 +22,7 @@ class TimeLine {
     initVis() {
       let vis = this;
   
-      vis.width = vis.config.containerWidth - vis.config.margin.left - vis.config.margin.right;
+      vis.width = vis.config.containerWidth - vis.config.margin.left;
       vis.height = vis.config.containerHeight - vis.config.margin.top - vis.config.margin.bottom;
   
       vis.xScale = d3.scaleTime()
@@ -95,7 +95,7 @@ class TimeLine {
 
       vis.svg.append("text")
             .attr("text-anchor", "end")
-            .attr("x", (vis.width / 2) + 2 * margin.left)
+            .attr("x", (vis.width / 2) + 3 * margin.left)
             .attr("y", margin.top)
             .text("Timeline");
         }

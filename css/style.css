@@ -59,6 +59,7 @@ p {
 .row {
   display: -webkit-flex;
   display: flex;
+  margin-bottom: 20px;
 }
 
 .column.side {
