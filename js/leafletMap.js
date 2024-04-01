@@ -259,4 +259,40 @@ class LeafletMap {
     //not using right now... 
  
   }
+
+  changeBackground(newValue) {
+    let vis = this;
+
+    var mapBounds = new L.LatLngBounds(
+      new L.LatLng(-90, -180), // Southwest corner
+      new L.LatLng(90, 180) // Northeast corner
+     );
+
+    if (newValue == 0) {
+      vis.base_layer = L.tileLayer(vis.topoUrl, {
+        id: 'topo-image',
+        attribution: vis.topoAttr,
+        ext: 'png',
+        noWrap: true,
+        bounds: mapBounds
+      });
+    }
+    else {
+      vis.base_layer = L.tileLayer(vis.esriUrl, {
+        id: 'esri-image',
+        attribution: vis.esriAttr,
+        ext: 'png',
+        noWrap: true,
+        bounds: mapBounds
+      });
+    }
+    vis.theMap = L.map('my-map', {
+      center: [0, 0],
+      zoom: 2,
+      layers: [vis.base_layer],
+      worldCopyJump: false,
+      maxBounds: mapBounds, 
+      maxBoundsViscosity: 1.0 
+    });
+  }
 }

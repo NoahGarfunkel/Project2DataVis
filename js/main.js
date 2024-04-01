@@ -237,3 +237,91 @@ function assignToBin(encounter_length) {
   }
   return null;
  }
+
+ function setFrequencyData(new_data){
+  yearlyFrequency = Array.from(d3.rollup(new_data, 
+    v => ({
+        frequency: v.length,
+        description: v.map(d => d.description)
+    }), 
+    d => d.year
+  ), ([year, {frequency, description}]) => ({year, frequency, description}));
+  yearlyFrequency.sort((a, b) => a.year - b.year);
+
+  monthlyFrequency = Array.from(d3.rollup(new_data, 
+    v => ({
+        frequency: v.length,
+        description: v.map(d => d.description)
+    }), 
+    d => d.month
+  ), ([month, {frequency, description}]) => ({month, frequency, description}));
+  monthlyFrequency.sort((a, b) => a.month - b.month);
+  
+  shapeFrequency = Array.from(d3.rollup(new_data, 
+    v => ({
+        frequency: v.length,
+        description: v.map(d => d.description)
+    }), 
+    d => d.ufo_shape
+  ), ([shape, {frequency, description}]) => ({shape, frequency, description}));
+  shapeFrequency.sort((a, b) => a.shape.localeCompare(b.shape));
+
+  timeOfDayFrequency = Array.from(d3.rollup(new_data, 
+      v => ({
+          frequency: v.length,
+          description: v.map(d => d.description)
+      }), 
+      d => getHourOfDay(d.date_time)
+  ), ([hour, {frequency, description}]) => ({hour, frequency, description}));
+  timeOfDayFrequency.sort((a, b) => a.hour - b.hour);
+  
+  encounterLengthFrequency = Array.from(d3.rollup(new_data, 
+    v => ({
+        frequency: v.length,
+        description: v.map(d => d.description)
+    }), 
+    d => assignToBin(d.encounter_length)
+  ), ([bin, {frequency, description}]) => ({bin, frequency, description}));
+  encounterLengthFrequency.sort((a, b) => binRanges.findIndex(range => range.label === a.bin) - binRanges.findIndex(range => range.label === b.bin));
+
+}
+
+function updateAllCharts(){
+  timeline.data = yearlyFrequency;
+  monthBarChart.data = monthlyFrequency;
+  shapeBarChart.data = shapeFrequency;
+  timeOfDayBarChart.data = timeOfDayFrequency;
+  encounterLengthBarChart.data = encounterLengthFrequency;
+  
+  timeline.updateVis()
+  monthBarChart.updateVis()
+  shapeBarChart.updateVis()
+  timeOfDayBarChart.updateVis()
+  encounterLengthBarChart.updateVis()
+}
+
+function getHourOfDay(date_time) {
+  return date_time.getHours();
+}
+
+function assignToBin(encounter_length) {
+  for (const bin of binRanges) {
+     if (encounter_length >= bin.min && (bin.max === undefined || encounter_length < bin.max)) {
+       return bin.label;
+     }
+  }
+  return null;
+ }
+
+let background = 0;
+function switchBackground() {
+  if (background == 0) {
+    background = 1;
+    leafletMap.changeBackground(1);
+  }
+  else {
+    background = 0;
+    leafletMap.changeBackground(0);
+  }
+  console.log(background)
+}
