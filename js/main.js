@@ -147,7 +147,7 @@ d3.csv('data/ufo_sightings.csv')
 
     timeline = new TimeLine({ parentElement: '#timeline'}, yearlyFrequency);
     timeline.updateVis();
-    
+
       monthlyFrequency = Array.from(d3.rollup(filteredData, 
         v => ({
             frequency: v.length,
@@ -244,13 +244,11 @@ d3.csv('data/ufo_sightings.csv')
         ResetDataFilter();
     }
     else {
-      console.log(selectedSpottings);
         if (visualization === '#monthBarChart') {
             shapeBarChart.resetBrush();
             timeOfDayBarChart.resetBrush();
             encounterLengthBarChart.resetBrush();
             filteredDataByMonth = filteredData.filter(d => selectedSpottings.some(s => s.month === d.month));
-            console.log(filteredDataByMonth);
             timeline.data = Array.from(d3.rollup(filteredDataByMonth, v => v.length, d => d.year), ([year, frequency]) => ({year, frequency})).sort((a, b) => a.year - b.year);
             timeline.updateVis();
             leafletMap.data = filteredDataByMonth;
@@ -263,7 +261,6 @@ d3.csv('data/ufo_sightings.csv')
           timeOfDayBarChart.resetBrush();
           encounterLengthBarChart.resetBrush();
           filteredDataByShape = filteredData.filter(d => selectedSpottings.some(s => s.shape === d.ufo_shape));
-          console.log(filteredDataByShape);
           timeline.data = Array.from(d3.rollup(filteredDataByShape, v => v.length, d => d.year), ([year, frequency]) => ({year, frequency})).sort((a, b) => a.year - b.year);
           timeline.updateVis();
           leafletMap.data = filteredDataByShape;
@@ -276,7 +273,6 @@ d3.csv('data/ufo_sightings.csv')
           shapeBarChart.resetBrush();
           encounterLengthBarChart.resetBrush();
           filteredDataByTime = filteredData.filter(d => selectedSpottings.some(s => s.hour === d.time));
-          console.log(filteredDataByTime);
           timeline.data = Array.from(d3.rollup(filteredDataByTime, v => v.length, d => d.year), ([year, frequency]) => ({year, frequency})).sort((a, b) => a.year - b.year);
           timeline.updateVis();
           leafletMap.data = filteredDataByTime;
@@ -302,7 +298,6 @@ d3.csv('data/ufo_sightings.csv')
                     return d.encounter_length >= range.min && (range.max === undefined || d.encounter_length < range.max);
                 });
             });
-            console.log(filteredDataByEncounterLength);
             timeline.data = Array.from(d3.rollup(filteredDataByEncounterLength, v => v.length, d => d.year), ([year, frequency]) => ({year, frequency})).sort((a, b) => a.year - b.year);
             timeline.updateVis();
             leafletMap.data = filteredDataByEncounterLength;
