@@ -1,4 +1,4 @@
-let filteredData, yearlyFrequency, monthlyFrequency, shapeFrequency, timeOfDayFrequency, selectedOption;
+let filteredData, yearlyFrequency, monthlyFrequency, shapeFrequency, timeOfDayFrequency, selectedOption, data;
 const dispatcher = d3.dispatch('filterVisualizations', 'reset')
 const binRanges = [
   { label: '0-5sec', min: 0, max: 5 },
@@ -40,8 +40,14 @@ d3.csv('data/ufo_sightings.csv')
 
     filteredData = data;
 
-    yearlyFrequency = Array.from(d3.rollup(data, v => v.length, d => d.year), ([year, frequency]) => ({year, frequency}));
-    yearlyFrequency.sort((a, b) => a.year - b.year);
+    yearlyFrequency = Array.from(d3.rollup(data, 
+      v => ({
+          frequency: v.length,
+          description: v.map(d => d.description)
+      }), 
+      d => d.year
+  ), ([year, {frequency, description}]) => ({year, frequency, description}));
+  yearlyFrequency.sort((a, b) => a.year - b.year);
     // Initialize chart and then show it
     leafletMap = new LeafletMap({ parentElement: '#my-map'}, data);
 
@@ -57,30 +63,45 @@ d3.csv('data/ufo_sightings.csv')
     leafletMap.updateColors(selectedOption);
     timeline.updateVis();
 
-    monthlyFrequency = Array.from(d3.rollup(data, v => v.length, d => d.month), ([month, frequency]) => ({month, frequency}));
-    monthlyFrequency.sort((a, b) => a.month - b.month);
-
-    monthBarChart = new BarchartCustomizable({ parentElement: "#monthBarChart", containerHeight: 400}, monthlyFrequency, "month", dispatcher, "Month");
-    monthBarChart.updateVis();
-
-    shapeFrequency = Array.from(d3.rollup(data, v => v.length, d => d.ufo_shape), ([shape, frequency]) => ({shape, frequency}));
-    shapeFrequency.sort((a, b) => a.shape.localeCompare(b.shape));
-
-    shapeBarChart = new BarchartCustomizable({ parentElement: "#shapeBarChart", containerHeight: 400}, shapeFrequency, "shape", dispatcher, "UFO Shape");
-    shapeBarChart.updateVis();
-
-    function getHourOfDay(date_time) {
+    monthlyFrequency = Array.from(d3.rollup(data, 
+      v => ({
+          frequency: v.length,
+          description: v.map(d => d.description)
+      }), 
+      d => d.month
+  ), ([month, {frequency, description}]) => ({month, frequency, description}));
+  monthlyFrequency.sort((a, b) => a.month - b.month);
+  
+  monthBarChart = new BarchartCustomizable({ parentElement: "#monthBarChart", containerHeight: 400}, monthlyFrequency, "month", dispatcher, "Month");
+  monthBarChart.updateVis();
+  
+  shapeFrequency = Array.from(d3.rollup(data, 
+      v => ({
+          frequency: v.length,
+          description: v.map(d => d.description)
+      }), 
+      d => d.ufo_shape
+  ), ([shape, {frequency, description}]) => ({shape, frequency, description}));
+  shapeFrequency.sort((a, b) => a.shape.localeCompare(b.shape));
+  
+  shapeBarChart = new BarchartCustomizable({ parentElement: "#shapeBarChart", containerHeight: 400}, shapeFrequency, "shape", dispatcher, "UFO Shape");
+  shapeBarChart.updateVis();
+  
+  function getHourOfDay(date_time) {
       return date_time.getHours();
-     }
-     
-    timeOfDayFrequency = Array.from(d3.rollup(data, v => v.length, d => getHourOfDay(d.date_time)), ([hour, frequency]) => ({hour, frequency}));
-    timeOfDayFrequency.sort((a, b) => a.hour - b.hour);
-     
-    timeOfDayBarChart = new BarchartCustomizable({ parentElement: "#timeOfDayBarChart", containerHeight: 300 }, timeOfDayFrequency, "hour", dispatcher, "Hour");
-    timeOfDayBarChart.updateVis();
-
-
-    
+  }
+  
+  timeOfDayFrequency = Array.from(d3.rollup(data, 
+      v => ({
+          frequency: v.length,
+          description: v.map(d => d.description)
+      }), 
+      d => getHourOfDay(d.date_time)
+  ), ([hour, {frequency, description}]) => ({hour, frequency, description}));
+  timeOfDayFrequency.sort((a, b) => a.hour - b.hour);
+  
+  timeOfDayBarChart = new BarchartCustomizable({ parentElement: "#timeOfDayBarChart", containerHeight: 300 }, timeOfDayFrequency, "hour", dispatcher, "Hour");
+  timeOfDayBarChart.updateVis();
 
     function assignToBin(encounter_length) {
      for (const bin of binRanges) {
@@ -91,12 +112,119 @@ d3.csv('data/ufo_sightings.csv')
      return null;
     }
 
-    encounterLengthFrequency = Array.from(d3.rollup(data, v => v.length, d => assignToBin(d.encounter_length)), ([bin, frequency]) => ({bin, frequency}));
-    encounterLengthFrequency.sort((a, b) => binRanges.findIndex(range => range.label === a.bin) - binRanges.findIndex(range => range.label === b.bin));
+    encounterLengthFrequency = Array.from(d3.rollup(data, 
+      v => ({
+          frequency: v.length,
+          description: v.map(d => d.description)
+      }), 
+      d => assignToBin(d.encounter_length)
+  ), ([bin, {frequency, description}]) => ({bin, frequency, description}));
+  encounterLengthFrequency.sort((a, b) => binRanges.findIndex(range => range.label === a.bin) - binRanges.findIndex(range => range.label === b.bin));
+  
 
     encounterLengthBarChart = new BarchartCustomizable({ parentElement: "#encounterLengthBarChart", containerHeight: 300 }, encounterLengthFrequency, "bin", dispatcher, "Encounter Length");
     encounterLengthBarChart.updateVis();
-  
+    
+    document.getElementById('textbox').addEventListener('input', function() {
+      const filterText = this.value.trim().toLowerCase();
+      const filteredData = data.filter(d => d.description && d.description.toLowerCase().includes(filterText));
+
+      yearlyFrequency = Array.from(d3.rollup(filteredData, 
+        v => ({
+            frequency: v.length,
+            description: v.map(d => d.description)
+        }), 
+        d => d.year
+    ), ([year, {frequency, description}]) => ({year, frequency, description}));
+    yearlyFrequency.sort((a, b) => a.year - b.year);
+    
+    if (timeline) {
+      const timelineChartElement = document.getElementById("timeline");
+      timelineChartElement.innerHTML = "";
+
+      timelineChart = null;
+    }
+
+    timeline = new TimeLine({ parentElement: '#timeline'}, yearlyFrequency);
+    timeline.updateVis();
+    
+      monthlyFrequency = Array.from(d3.rollup(filteredData, 
+        v => ({
+            frequency: v.length,
+            description: v.map(d => d.description)
+        }), 
+        d => d.month
+    ), ([month, {frequency, description}]) => ({month, frequency, description}));
+      monthlyFrequency.sort((a, b) => a.month - b.month);
+      
+      if (monthBarChart) {
+        const monthBarChartElement = document.getElementById("monthBarChart");
+        monthBarChartElement.innerHTML = "";
+
+        monthBarChart = null;
+      }
+
+      monthBarChart = new BarchartCustomizable({ parentElement: "#monthBarChart", containerHeight: 400}, monthlyFrequency, "month", dispatcher);
+      monthBarChart.updateVis();
+
+      shapeFrequency = Array.from(d3.rollup(filteredData, 
+        v => ({
+            frequency: v.length,
+            description: v.map(d => d.description)
+        }), 
+        d => d.ufo_shape
+    ), ([shape, {frequency, description}]) => ({shape, frequency, description}));
+    shapeFrequency.sort((a, b) => a.shape.localeCompare(b.shape));
+
+      if (shapeBarChart) {
+        const shapeBarChartElement = document.getElementById("shapeBarChart");
+        shapeBarChartElement.innerHTML = "";
+
+        shapeBarChart = null;
+      }
+      
+      shapeBarChart = new BarchartCustomizable({ parentElement: "#shapeBarChart", containerHeight: 400}, shapeFrequency, "shape", dispatcher);
+      shapeBarChart.updateVis();
+
+      timeOfDayFrequency = Array.from(d3.rollup(filteredData, 
+        v => ({
+            frequency: v.length,
+            description: v.map(d => d.description)
+        }), 
+        d => getHourOfDay(d.date_time)
+    ), ([hour, {frequency, description}]) => ({hour, frequency, description}));
+    timeOfDayFrequency.sort((a, b) => a.hour - b.hour);
+    
+    if (timeOfDayBarChart) {
+        const timeOfDayBarChartElement = document.getElementById("timeOfDayBarChart");
+        timeOfDayBarChartElement.innerHTML = "";
+    
+        timeOfDayBarChart = null;
+    }
+    
+    timeOfDayBarChart = new BarchartCustomizable({ parentElement: "#timeOfDayBarChart", containerHeight: 300 }, timeOfDayFrequency, "hour", dispatcher);
+    timeOfDayBarChart.updateVis();
+    
+    encounterLengthFrequency = Array.from(d3.rollup(filteredData, 
+      v => ({
+          frequency: v.length,
+          description: v.map(d => d.description)
+      }), 
+      d => assignToBin(d.encounter_length)
+  ), ([bin, {frequency, description}]) => ({bin, frequency, description}));
+  encounterLengthFrequency.sort((a, b) => binRanges.findIndex(range => range.label === a.bin) - binRanges.findIndex(range => range.label === b.bin));
+    
+    if (encounterLengthBarChart) {
+        const encounterLengthBarChartElement = document.getElementById("encounterLengthBarChart");
+        encounterLengthBarChartElement.innerHTML = "";
+    
+        encounterLengthBarChart = null;
+    }
+    
+    encounterLengthBarChart = new BarchartCustomizable({ parentElement: "#encounterLengthBarChart", containerHeight: 300 }, encounterLengthFrequency, "bin", dispatcher);
+    encounterLengthBarChart.updateVis();
+    }); 
+    
   })
   .catch(error => console.error(error));
 
@@ -189,6 +317,3 @@ dispatcher.on('reset', () => {
     timeline.updateVis();
     monthBarChart.updateVis();
 })
-
-  
-
