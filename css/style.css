@@ -54,6 +54,10 @@ p {
 .header p {
   margin: 10px;
 }
+.centered_element {
+  text-align: center;
+  font-size: 20px;
+}
 
 /* Container for flexboxes */
 .row {
