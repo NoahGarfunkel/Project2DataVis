@@ -29,7 +29,10 @@ d3.csv('data/ufo_sightings.csv')
       d.encounter_length = d.encounter_length;
       d.year = d.date_time.getFullYear();
       d.month = d.date_time.getMonth() + 1;
+      d.day = d.date_time.getDate();
       d.time = d.date_time.getHours() + d.date_time.getMinutes()/60;
+      d.hour = d.date_time.getHours();
+      d.minutes = d.date_time.getMinutes()
     });
 
     data = data.filter(d=>d.year>2000);
@@ -69,7 +72,7 @@ d3.csv('data/ufo_sightings.csv')
   ), ([month, {frequency, description}]) => ({month, frequency, description}));
   monthlyFrequency.sort((a, b) => a.month - b.month);
   
-  monthBarChart = new BarchartCustomizable({ parentElement: "#monthBarChart", containerHeight: 400}, monthlyFrequency, "month", dispatcher);
+  monthBarChart = new BarchartCustomizable({ parentElement: "#monthBarChart", containerHeight: 400}, monthlyFrequency, "month", dispatcher, "Month");
   monthBarChart.updateVis();
   
   shapeFrequency = Array.from(d3.rollup(data, 
@@ -81,7 +84,7 @@ d3.csv('data/ufo_sightings.csv')
   ), ([shape, {frequency, description}]) => ({shape, frequency, description}));
   shapeFrequency.sort((a, b) => a.shape.localeCompare(b.shape));
   
-  shapeBarChart = new BarchartCustomizable({ parentElement: "#shapeBarChart", containerHeight: 400}, shapeFrequency, "shape", dispatcher);
+  shapeBarChart = new BarchartCustomizable({ parentElement: "#shapeBarChart", containerHeight: 400}, shapeFrequency, "shape", dispatcher, "UFO Shape");
   shapeBarChart.updateVis();
   
   function getHourOfDay(date_time) {
@@ -97,7 +100,7 @@ d3.csv('data/ufo_sightings.csv')
   ), ([hour, {frequency, description}]) => ({hour, frequency, description}));
   timeOfDayFrequency.sort((a, b) => a.hour - b.hour);
   
-  timeOfDayBarChart = new BarchartCustomizable({ parentElement: "#timeOfDayBarChart", containerHeight: 300 }, timeOfDayFrequency, "hour", dispatcher);
+  timeOfDayBarChart = new BarchartCustomizable({ parentElement: "#timeOfDayBarChart", containerHeight: 300 }, timeOfDayFrequency, "hour", dispatcher, "Hour");
   timeOfDayBarChart.updateVis();
 
     function assignToBin(encounter_length) {
@@ -119,7 +122,7 @@ d3.csv('data/ufo_sightings.csv')
   encounterLengthFrequency.sort((a, b) => binRanges.findIndex(range => range.label === a.bin) - binRanges.findIndex(range => range.label === b.bin));
   
 
-    encounterLengthBarChart = new BarchartCustomizable({ parentElement: "#encounterLengthBarChart", containerHeight: 300 }, encounterLengthFrequency, "bin", dispatcher);
+    encounterLengthBarChart = new BarchartCustomizable({ parentElement: "#encounterLengthBarChart", containerHeight: 300 }, encounterLengthFrequency, "bin", dispatcher, "Encounter Length");
     encounterLengthBarChart.updateVis();
     
     document.getElementById('textbox').addEventListener('input', function() {

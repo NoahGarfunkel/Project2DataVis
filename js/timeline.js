@@ -10,7 +10,7 @@ class TimeLine {
         parentElement: _config.parentElement,
         containerWidth: _config.containerWidth || 800,
         containerHeight: _config.containerHeight || 240,
-        margin: _config.margin || {top: 50, right: 200, bottom: 30, left: 50}
+        margin: _config.margin || {top: 50, right: 50, bottom: 30, left: 50}
       }
       this.data = _data;
       this.initVis();
@@ -22,7 +22,7 @@ class TimeLine {
     initVis() {
       let vis = this;
   
-      vis.width = vis.config.containerWidth - vis.config.margin.left - vis.config.margin.right;
+      vis.width = vis.config.containerWidth - vis.config.margin.left;
       vis.height = vis.config.containerHeight - vis.config.margin.top - vis.config.margin.bottom;
   
       vis.xScale = d3.scaleTime()
@@ -90,7 +90,15 @@ class TimeLine {
       vis.tooltip.append('text');
 
       vis.selectedOption = document.getElementById('color_attr').selectedOptions[0];
-    }
+
+      var margin = {top: 20, right: 30, bottom: 50, left: 30}
+
+      vis.svg.append("text")
+            .attr("text-anchor", "end")
+            .attr("x", (vis.width / 2) + 3 * margin.left)
+            .attr("y", margin.top)
+            .text("Timeline");
+        }
   
     /**
      * Prepare the data and scales before we render it.
@@ -152,7 +160,7 @@ class TimeLine {
             
             vis.tooltip.select('text')
                 .attr('transform', `translate(${vis.xScale(d.year)},${(vis.yScale(d.frequency) - 15)})`)
-                .text(`${Math.round(d.frequency)} Sightings, ${d.year}`);
+                .text(`${d.year}: ${Math.round(d.frequency)} Sightings`);
           });
       
       // Update the axes
