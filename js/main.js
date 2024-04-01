@@ -137,34 +137,21 @@ d3.csv('data/ufo_sightings.csv')
         d => d.year
     ), ([year, {frequency, description}]) => ({year, frequency, description}));
     yearlyFrequency.sort((a, b) => a.year - b.year);
-    
-    if (timeline) {
-      const timelineChartElement = document.getElementById("timeline");
-      timelineChartElement.innerHTML = "";
-
-      timelineChart = null;
-    }
-
-    timeline = new TimeLine({ parentElement: '#timeline'}, yearlyFrequency);
+  
+    timeline.data = yearlyFrequency
     timeline.updateVis();
 
-      monthlyFrequency = Array.from(d3.rollup(filteredData, 
+    monthlyFrequency = Array.from(d3.rollup(filteredData, 
         v => ({
             frequency: v.length,
             description: v.map(d => d.description)
         }), 
         d => d.month
-    ), ([month, {frequency, description}]) => ({month, frequency, description}));
+      ), ([month, {frequency, description}]) => ({month, frequency, description}));
       monthlyFrequency.sort((a, b) => a.month - b.month);
       
-      if (monthBarChart) {
-        const monthBarChartElement = document.getElementById("monthBarChart");
-        monthBarChartElement.innerHTML = "";
-
-        monthBarChart = null;
-      }
-
-      monthBarChart = new BarchartCustomizable({ parentElement: "#monthBarChart", containerHeight: 400}, monthlyFrequency, "month", dispatcher);
+     
+      monthBarChart.data = monthlyFrequency
       monthBarChart.updateVis();
 
       shapeFrequency = Array.from(d3.rollup(filteredData, 
@@ -173,17 +160,10 @@ d3.csv('data/ufo_sightings.csv')
             description: v.map(d => d.description)
         }), 
         d => d.ufo_shape
-    ), ([shape, {frequency, description}]) => ({shape, frequency, description}));
-    shapeFrequency.sort((a, b) => a.shape.localeCompare(b.shape));
+      ), ([shape, {frequency, description}]) => ({shape, frequency, description}));
+      shapeFrequency.sort((a, b) => a.shape.localeCompare(b.shape));
 
-      if (shapeBarChart) {
-        const shapeBarChartElement = document.getElementById("shapeBarChart");
-        shapeBarChartElement.innerHTML = "";
-
-        shapeBarChart = null;
-      }
-      
-      shapeBarChart = new BarchartCustomizable({ parentElement: "#shapeBarChart", containerHeight: 400}, shapeFrequency, "shape", dispatcher);
+      shapeBarChart.data = shapeFrequency
       shapeBarChart.updateVis();
 
       timeOfDayFrequency = Array.from(d3.rollup(filteredData, 
@@ -192,18 +172,11 @@ d3.csv('data/ufo_sightings.csv')
             description: v.map(d => d.description)
         }), 
         d => getHourOfDay(d.date_time)
-    ), ([hour, {frequency, description}]) => ({hour, frequency, description}));
-    timeOfDayFrequency.sort((a, b) => a.hour - b.hour);
+      ), ([hour, {frequency, description}]) => ({hour, frequency, description}));
+      timeOfDayFrequency.sort((a, b) => a.hour - b.hour);
     
-    if (timeOfDayBarChart) {
-        const timeOfDayBarChartElement = document.getElementById("timeOfDayBarChart");
-        timeOfDayBarChartElement.innerHTML = "";
-    
-        timeOfDayBarChart = null;
-    }
-    
-    timeOfDayBarChart = new BarchartCustomizable({ parentElement: "#timeOfDayBarChart", containerHeight: 300 }, timeOfDayFrequency, "hour", dispatcher);
-    timeOfDayBarChart.updateVis();
+    timeOfDayBarChart.data = timeOfDayFrequency
+        timeOfDayBarChart.updateVis();
     
     encounterLengthFrequency = Array.from(d3.rollup(filteredData, 
       v => ({
@@ -211,17 +184,10 @@ d3.csv('data/ufo_sightings.csv')
           description: v.map(d => d.description)
       }), 
       d => assignToBin(d.encounter_length)
-  ), ([bin, {frequency, description}]) => ({bin, frequency, description}));
-  encounterLengthFrequency.sort((a, b) => binRanges.findIndex(range => range.label === a.bin) - binRanges.findIndex(range => range.label === b.bin));
-    
-    if (encounterLengthBarChart) {
-        const encounterLengthBarChartElement = document.getElementById("encounterLengthBarChart");
-        encounterLengthBarChartElement.innerHTML = "";
-    
-        encounterLengthBarChart = null;
-    }
-    
-    encounterLengthBarChart = new BarchartCustomizable({ parentElement: "#encounterLengthBarChart", containerHeight: 300 }, encounterLengthFrequency, "bin", dispatcher);
+    ), ([bin, {frequency, description}]) => ({bin, frequency, description}));
+    encounterLengthFrequency.sort((a, b) => binRanges.findIndex(range => range.label === a.bin) - binRanges.findIndex(range => range.label === b.bin));
+
+    encounterLengthBarChart.data = encounterLengthFrequency
     encounterLengthBarChart.updateVis();
     }); 
     
@@ -312,3 +278,7 @@ dispatcher.on('reset', () => {
     timeline.updateVis();
     monthBarChart.updateVis();
 })
+
+function setAllChartData(data){
+  // TODO: Move repeated chart data code here
+}
