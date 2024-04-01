@@ -35,7 +35,7 @@ d3.csv('data/ufo_sightings.csv')
       d.minutes = d.date_time.getMinutes()
     });
 
-    data = data.filter(d=>d.year>2000);
+    data = data.filter(d=>d.year>1999);
     selectedOption = "year";
 
     filteredData = data;

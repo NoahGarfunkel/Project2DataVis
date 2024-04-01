@@ -174,5 +174,7 @@ BrushMoved(selection) {
 resetBrush(){
     this.brush.move(this.brushG, null);
     this.Brushed(null);
+    this.chart.selectAll('.bar')
+        .style('fill', 'steelblue');
 }
 }
