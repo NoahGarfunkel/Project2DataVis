@@ -41,13 +41,8 @@ d3.csv('data/ufo_sightings.csv')
     filteredData = data;
 
 
-    // Update all of the data for each chart
-    setFrequencyData(data);
-    
     // Initialize chart and then show it
     leafletMap = new LeafletMap({ parentElement: '#my-map'}, data);
-
- 
     d3.select(`#color_attr`).on('change', function() {
       selectedOption = d3.select(this).property('value');
       
@@ -55,6 +50,9 @@ d3.csv('data/ufo_sightings.csv')
       leafletMap.updateColors(selectedOption);
     });
     leafletMap.updateColors(selectedOption);
+
+    // Update all of the data for each chart
+    setFrequencyData(data);
 
     // initialize all charts
     timeline = new TimeLine({ parentElement: '#timeline'}, yearlyFrequency);
@@ -66,7 +64,7 @@ d3.csv('data/ufo_sightings.csv')
     // show the data on all charts
     updateAllCharts();
 
-    document.getElementById('textbox').addEventListener('input', function() {
+    document.getElementById('textbox').addEventListener('change', function() {
         const filterText = this.value.trim().toLowerCase();
         const filteredData = data.filter(d => d.description && d.description.toLowerCase().includes(filterText));
         setFrequencyData(filteredData)
@@ -76,6 +74,7 @@ d3.csv('data/ufo_sightings.csv')
   })
   .catch(error => console.error(error));
 
+  // same as updateAllCharts()?
   function ResetDataFilter() {
     monthBarChart.data = monthlyFrequency;
     monthBarChart.updateVis();
@@ -99,23 +98,16 @@ d3.csv('data/ufo_sightings.csv')
             timeOfDayBarChart.resetBrush();
             encounterLengthBarChart.resetBrush();
             filteredDataByMonth = filteredData.filter(d => selectedSpottings.some(s => s.month === d.month));
-            timeline.data = Array.from(d3.rollup(filteredDataByMonth, v => v.length, d => d.year), ([year, frequency]) => ({year, frequency})).sort((a, b) => a.year - b.year);
-            timeline.updateVis();
-            leafletMap.data = filteredDataByMonth;
-            leafletMap.updateVis();
-            leafletMap.updateColors(selectedOption);
-            
+            setFrequencyData(filteredDataByMonth);
+            updateAllCharts();
         }
         if (visualization === '#shapeBarChart') {
           monthBarChart.resetBrush();
           timeOfDayBarChart.resetBrush();
           encounterLengthBarChart.resetBrush();
           filteredDataByShape = filteredData.filter(d => selectedSpottings.some(s => s.shape === d.ufo_shape));
-          timeline.data = Array.from(d3.rollup(filteredDataByShape, v => v.length, d => d.year), ([year, frequency]) => ({year, frequency})).sort((a, b) => a.year - b.year);
-          timeline.updateVis();
-          leafletMap.data = filteredDataByShape;
-          leafletMap.updateVis();
-          leafletMap.updateColors(selectedOption);
+          setFrequencyData(filteredDataByShape);
+          updateAllCharts();
           
         }
         if (visualization === '#timeOfDayBarChart') {
@@ -123,11 +115,8 @@ d3.csv('data/ufo_sightings.csv')
           shapeBarChart.resetBrush();
           encounterLengthBarChart.resetBrush();
           filteredDataByTime = filteredData.filter(d => selectedSpottings.some(s => s.hour === d.time));
-          timeline.data = Array.from(d3.rollup(filteredDataByTime, v => v.length, d => d.year), ([year, frequency]) => ({year, frequency})).sort((a, b) => a.year - b.year);
-          timeline.updateVis();
-          leafletMap.data = filteredDataByTime;
-          leafletMap.updateVis();
-          leafletMap.updateColors(selectedOption);
+          setFrequencyData(filteredDataByTime);
+          updateAllCharts();
         }
 
         function getRangeFromBinLabel(binLabel) {
@@ -148,15 +137,13 @@ d3.csv('data/ufo_sightings.csv')
                     return d.encounter_length >= range.min && (range.max === undefined || d.encounter_length < range.max);
                 });
             });
-            timeline.data = Array.from(d3.rollup(filteredDataByEncounterLength, v => v.length, d => d.year), ([year, frequency]) => ({year, frequency})).sort((a, b) => a.year - b.year);
-            timeline.updateVis();
-            leafletMap.data = filteredDataByEncounterLength;
-            leafletMap.updateVis();
-            leafletMap.updateColors(selectedOption);
+            setFrequencyData(filteredDataByEncounterLength);
+            updateAllCharts();
         }
     }
 })
 
+// TODO: Check this out and maybe replace with setFrequencyData(data); updateAllCharts();
 dispatcher.on('reset', () => {
     ResetDataFilter();
     timeline.updateVis();
@@ -208,6 +195,7 @@ function setFrequencyData(new_data){
     d => assignToBin(d.encounter_length)
   ), ([bin, {frequency, description}]) => ({bin, frequency, description}));
   encounterLengthFrequency.sort((a, b) => binRanges.findIndex(range => range.label === a.bin) - binRanges.findIndex(range => range.label === b.bin));
+  leafletMap.data = new_data;
 
 }
 
@@ -218,6 +206,8 @@ function updateAllCharts(){
   timeOfDayBarChart.data = timeOfDayFrequency;
   encounterLengthBarChart.data = encounterLengthFrequency;
   
+  leafletMap.updateVis();
+  leafletMap.updateColors(selectedOption);
   timeline.updateVis()
   monthBarChart.updateVis()
   shapeBarChart.updateVis()
