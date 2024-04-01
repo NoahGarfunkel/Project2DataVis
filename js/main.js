@@ -235,6 +235,8 @@ d3.csv('data/ufo_sightings.csv')
     shapeBarChart.updateVis();
     timeOfDayBarChart.data = timeOfDayFrequency;
     timeOfDayBarChart.updateVis();
+    encounterLengthBarChart.data = encounterLengthFrequency;
+    encounterLengthBarChart.updateVis();
     timeline.data = yearlyFrequency;
     timeline.updateVis();
   }
