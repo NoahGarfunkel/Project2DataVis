@@ -243,14 +243,14 @@ class TimeLine {
 
     const selectedData = vis.data.filter(d => {
       const xVal = vis.xScale(d.year);
-      console.log(d.year);
-      console.log(xVal);
+      //console.log(d.year);
+      //console.log(xVal);
       return xVal > selectionStart && xVal < selectionEnd;
     });
 
 
-    console.log("SELECTED DATA");
-    console.log(selectedData);
+    //console.log("SELECTED DATA");
+    //console.log(selectedData);
 
     // Dispatch the selected data
     vis.dispatcher.call('filterVisualizations', vis.event, selectedData, vis.config.parentElement);
@@ -269,16 +269,16 @@ class TimeLine {
       .attr('class', 'chart-line')
       .style('stroke', 'red')
       .attr('d', vis.line);
-    // // Change the color of marks within the selection
-    // vis.marks.selectAll('.chart-line')
-    //   .filter(d => {
-    //     const xVal = vis.xScale(d.year);
-    //     return xVal > selectionStart && xVal < selectionEnd;
-    //   })
-    //   .style('stroke', 'red');
+
   }
   resetBrush() {
     this.brush.move(this.brushG, null);
     this.Brushed(null);
+    this.highlighted.selectAll('.chart-line')
+      .data([])
+      .join('path')
+      .attr('class', 'chart-line')
+      .style('stroke', 'red')
+      .attr('d', this.line);
   }
 }
