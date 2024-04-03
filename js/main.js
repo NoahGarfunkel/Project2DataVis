@@ -98,7 +98,7 @@ d3.csv('data/ufo_sightings.csv')
             timeOfDayBarChart.resetBrush();
             encounterLengthBarChart.resetBrush();
             filteredDataByMonth = filteredData.filter(d => selectedSpottings.some(s => s.month === d.month));
-            setFrequencyData(filteredDataByMonth);
+            setFrequencyData(filteredDataByMonth, visualization);
             updateAllCharts();
         }
         if (visualization === '#shapeBarChart') {
@@ -106,7 +106,7 @@ d3.csv('data/ufo_sightings.csv')
           timeOfDayBarChart.resetBrush();
           encounterLengthBarChart.resetBrush();
           filteredDataByShape = filteredData.filter(d => selectedSpottings.some(s => s.shape === d.ufo_shape));
-          setFrequencyData(filteredDataByShape);
+          setFrequencyData(filteredDataByShape, visualization);
           updateAllCharts();
           
         }
@@ -115,7 +115,7 @@ d3.csv('data/ufo_sightings.csv')
           shapeBarChart.resetBrush();
           encounterLengthBarChart.resetBrush();
           filteredDataByTime = filteredData.filter(d => selectedSpottings.some(s => s.hour === d.time));
-          setFrequencyData(filteredDataByTime);
+          setFrequencyData(filteredDataByTime, visualization);
           updateAllCharts();
         }
 
@@ -137,7 +137,7 @@ d3.csv('data/ufo_sightings.csv')
                     return d.encounter_length >= range.min && (range.max === undefined || d.encounter_length < range.max);
                 });
             });
-            setFrequencyData(filteredDataByEncounterLength);
+            setFrequencyData(filteredDataByEncounterLength, visualization);
             updateAllCharts();
         }
     }
@@ -150,7 +150,7 @@ dispatcher.on('reset', () => {
     monthBarChart.updateVis();
 })
 
-function setFrequencyData(new_data){
+function setFrequencyData(new_data, chart){
   yearlyFrequency = Array.from(d3.rollup(new_data, 
     v => ({
         frequency: v.length,
@@ -160,33 +160,39 @@ function setFrequencyData(new_data){
   ), ([year, {frequency, description}]) => ({year, frequency, description}));
   yearlyFrequency.sort((a, b) => a.year - b.year);
 
-  monthlyFrequency = Array.from(d3.rollup(new_data, 
-    v => ({
-        frequency: v.length,
-        description: v.map(d => d.description)
-    }), 
-    d => d.month
-  ), ([month, {frequency, description}]) => ({month, frequency, description}));
-  monthlyFrequency.sort((a, b) => a.month - b.month);
-  
-  shapeFrequency = Array.from(d3.rollup(new_data, 
-    v => ({
-        frequency: v.length,
-        description: v.map(d => d.description)
-    }), 
-    d => d.ufo_shape
-  ), ([shape, {frequency, description}]) => ({shape, frequency, description}));
-  shapeFrequency.sort((a, b) => a.shape.localeCompare(b.shape));
-
-  timeOfDayFrequency = Array.from(d3.rollup(new_data, 
+  if (chart !== "#monthBarChart"){
+    monthlyFrequency = Array.from(d3.rollup(new_data, 
       v => ({
           frequency: v.length,
           description: v.map(d => d.description)
       }), 
-      d => getHourOfDay(d.date_time)
-  ), ([hour, {frequency, description}]) => ({hour, frequency, description}));
-  timeOfDayFrequency.sort((a, b) => a.hour - b.hour);
-  
+      d => d.month
+    ), ([month, {frequency, description}]) => ({month, frequency, description}));
+    monthlyFrequency.sort((a, b) => a.month - b.month);
+  }
+ 
+  if (chart !== "#shapeBarChart"){
+    shapeFrequency = Array.from(d3.rollup(new_data, 
+      v => ({
+          frequency: v.length,
+          description: v.map(d => d.description)
+      }), 
+      d => d.ufo_shape
+    ), ([shape, {frequency, description}]) => ({shape, frequency, description}));
+    shapeFrequency.sort((a, b) => a.shape.localeCompare(b.shape));
+  }
+
+  if (chart !== "#timeOfDayBarChart"){
+    timeOfDayFrequency = Array.from(d3.rollup(new_data, 
+        v => ({
+            frequency: v.length,
+            description: v.map(d => d.description)
+        }), 
+        d => getHourOfDay(d.date_time)
+    ), ([hour, {frequency, description}]) => ({hour, frequency, description}));
+    timeOfDayFrequency.sort((a, b) => a.hour - b.hour);
+  }
+  if (chart !== "#encounterLengthBarChart"){
   encounterLengthFrequency = Array.from(d3.rollup(new_data, 
     v => ({
         frequency: v.length,
@@ -195,8 +201,8 @@ function setFrequencyData(new_data){
     d => assignToBin(d.encounter_length)
   ), ([bin, {frequency, description}]) => ({bin, frequency, description}));
   encounterLengthFrequency.sort((a, b) => binRanges.findIndex(range => range.label === a.bin) - binRanges.findIndex(range => range.label === b.bin));
+  }
   leafletMap.data = new_data;
-
 }
 
 function updateAllCharts(){
