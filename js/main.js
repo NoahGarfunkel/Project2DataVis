@@ -40,21 +40,21 @@ d3.csv('data/ufo_sightings.csv')
 
     filteredData = data;
 
+
     // Update all of the data for each chart
     setFrequencyData(data);
+
     // Initialize chart and then show it
     leafletMap = new LeafletMap({ parentElement: '#my-map' }, data);
-    d3.select(`#color_attr`).on('change', function () {
 
+
+    d3.select(`#color_attr`).on('change', function () {
       selectedOption = d3.select(this).property('value');
 
       // Update colors based on the selected option
       leafletMap.updateColors(selectedOption);
     });
     leafletMap.updateColors(selectedOption);
-
-    // Update all of the data for each chart
-    setFrequencyData(data);
 
     // initialize all charts
     timeline = new TimeLine({ parentElement: '#timeline' }, yearlyFrequency);
@@ -76,7 +76,6 @@ d3.csv('data/ufo_sightings.csv')
   })
   .catch(error => console.error(error));
 
-// same as updateAllCharts()?
 function ResetDataFilter() {
   monthBarChart.data = monthlyFrequency;
   monthBarChart.updateVis();
@@ -91,120 +90,125 @@ function ResetDataFilter() {
 }
 
 dispatcher.on('filterVisualizations', (selectedSpottings, visualization) => {
-  if (selectedSpottings.length == 0){
-      ResetDataFilter();
+  if (selectedSpottings.length == 0) {
+    ResetDataFilter();
   }
   else {
-      if (visualization === '#monthBarChart') {
-          shapeBarChart.resetBrush();
-          timeOfDayBarChart.resetBrush();
-          encounterLengthBarChart.resetBrush();
-          filteredDataByMonth = filteredData.filter(d => selectedSpottings.some(s => s.month === d.month));
-          setFrequencyData(filteredDataByMonth, visualization);
-          updateAllCharts();
-      }
-      if (visualization === '#shapeBarChart') {
-        monthBarChart.resetBrush();
-        timeOfDayBarChart.resetBrush();
-        encounterLengthBarChart.resetBrush();
-        filteredDataByShape = filteredData.filter(d => selectedSpottings.some(s => s.shape === d.ufo_shape));
-        setFrequencyData(filteredDataByShape, visualization);
-        updateAllCharts();
-        
-      }
-      if (visualization === '#timeOfDayBarChart') {
-        monthBarChart.resetBrush();
-        shapeBarChart.resetBrush();
-        encounterLengthBarChart.resetBrush();
-        filteredDataByTime = filteredData.filter(d => selectedSpottings.some(s => s.hour === d.time));
-        setFrequencyData(filteredDataByTime, visualization);
-        updateAllCharts();
-      }
+    if (visualization === '#monthBarChart') {
+      shapeBarChart.resetBrush();
+      timeOfDayBarChart.resetBrush();
+      encounterLengthBarChart.resetBrush();
+      filteredDataByMonth = filteredData.filter(d => selectedSpottings.some(s => s.month === d.month));
+      timeline.data = Array.from(d3.rollup(filteredDataByMonth, v => v.length, d => d.year), ([year, frequency]) => ({ year, frequency })).sort((a, b) => a.year - b.year);
+      timeline.updateVis();
+      leafletMap.data = filteredDataByMonth;
+      leafletMap.updateVis();
+      leafletMap.updateColors(selectedOption);
 
-      function getRangeFromBinLabel(binLabel) {
-        const bin = binRanges.find(b => b.label === binLabel);
-        if (!bin) return null; // Return null if no matching bin is found
-    
-        return { min: bin.min, max: bin.max };
+    }
+    if (visualization === '#shapeBarChart') {
+      monthBarChart.resetBrush();
+      timeOfDayBarChart.resetBrush();
+      encounterLengthBarChart.resetBrush();
+      filteredDataByShape = filteredData.filter(d => selectedSpottings.some(s => s.shape === d.ufo_shape));
+      timeline.data = Array.from(d3.rollup(filteredDataByShape, v => v.length, d => d.year), ([year, frequency]) => ({ year, frequency })).sort((a, b) => a.year - b.year);
+      timeline.updateVis();
+      leafletMap.data = filteredDataByShape;
+      leafletMap.updateVis();
+      leafletMap.updateColors(selectedOption);
+
+    }
+    if (visualization === '#timeOfDayBarChart') {
+      monthBarChart.resetBrush();
+      shapeBarChart.resetBrush();
+      encounterLengthBarChart.resetBrush();
+      filteredDataByTime = filteredData.filter(d => selectedSpottings.some(s => s.hour === d.time));
+      timeline.data = Array.from(d3.rollup(filteredDataByTime, v => v.length, d => d.year), ([year, frequency]) => ({ year, frequency })).sort((a, b) => a.year - b.year);
+      timeline.updateVis();
+      leafletMap.data = filteredDataByTime;
+      leafletMap.updateVis();
+      leafletMap.updateColors(selectedOption);
     }
 
-      if (visualization === '#encounterLengthBarChart') {
-          monthBarChart.resetBrush();
-          shapeBarChart.resetBrush();
-          timeOfDayBarChart.resetBrush();
-          filteredDataByEncounterLength = filteredData.filter(d => {
-              return selectedSpottings.some(s => {
-                  const range = getRangeFromBinLabel(s.bin);
-                  if (!range) return false;
-                  return d.encounter_length >= range.min && (range.max === undefined || d.encounter_length < range.max);
-              });
-          });
-          setFrequencyData(filteredDataByEncounterLength, visualization);
-          updateAllCharts();
-      }
+    function getRangeFromBinLabel(binLabel) {
+      const bin = binRanges.find(b => b.label === binLabel);
+      if (!bin) return null; // Return null if no matching bin is found
+
+      return { min: bin.min, max: bin.max };
+    }
+
+    if (visualization === '#encounterLengthBarChart') {
+      monthBarChart.resetBrush();
+      shapeBarChart.resetBrush();
+      timeOfDayBarChart.resetBrush();
+      filteredDataByEncounterLength = filteredData.filter(d => {
+        return selectedSpottings.some(s => {
+          const range = getRangeFromBinLabel(s.bin);
+          if (!range) return false;
+          return d.encounter_length >= range.min && (range.max === undefined || d.encounter_length < range.max);
+        });
+      });
+      timeline.data = Array.from(d3.rollup(filteredDataByEncounterLength, v => v.length, d => d.year), ([year, frequency]) => ({ year, frequency })).sort((a, b) => a.year - b.year);
+      timeline.updateVis();
+      leafletMap.data = filteredDataByEncounterLength;
+      leafletMap.updateVis();
+      leafletMap.updateColors(selectedOption);
+    }
   }
 })
 
-// TODO: Check this out and maybe replace with setFrequencyData(data); updateAllCharts();
 dispatcher.on('reset', () => {
   ResetDataFilter();
   timeline.updateVis();
   monthBarChart.updateVis();
 })
 
-function setFrequencyData(new_data, chart){
-  yearlyFrequency = Array.from(d3.rollup(new_data, 
+function setFrequencyData(new_data) {
+  yearlyFrequency = Array.from(d3.rollup(new_data,
     v => ({
-        frequency: v.length,
-        description: v.map(d => d.description)
-    }), 
+      frequency: v.length,
+      description: v.map(d => d.description)
+    }),
     d => d.year
-  ), ([year, {frequency, description}]) => ({year, frequency, description}));
+  ), ([year, { frequency, description }]) => ({ year, frequency, description }));
   yearlyFrequency.sort((a, b) => a.year - b.year);
 
-  if (chart !== "#monthBarChart"){
-    monthlyFrequency = Array.from(d3.rollup(new_data, 
-      v => ({
-          frequency: v.length,
-          description: v.map(d => d.description)
-      }), 
-      d => d.month
-    ), ([month, {frequency, description}]) => ({month, frequency, description}));
-    monthlyFrequency.sort((a, b) => a.month - b.month);
-  }
- 
-  if (chart !== "#shapeBarChart"){
-    shapeFrequency = Array.from(d3.rollup(new_data, 
-      v => ({
-          frequency: v.length,
-          description: v.map(d => d.description)
-      }), 
-      d => d.ufo_shape
-    ), ([shape, {frequency, description}]) => ({shape, frequency, description}));
-    shapeFrequency.sort((a, b) => a.shape.localeCompare(b.shape));
-  }
-
-  if (chart !== "#timeOfDayBarChart"){
-    timeOfDayFrequency = Array.from(d3.rollup(new_data, 
-        v => ({
-            frequency: v.length,
-            description: v.map(d => d.description)
-        }), 
-        d => getHourOfDay(d.date_time)
-    ), ([hour, {frequency, description}]) => ({hour, frequency, description}));
-    timeOfDayFrequency.sort((a, b) => a.hour - b.hour);
-  }
-  if (chart !== "#encounterLengthBarChart"){
-  encounterLengthFrequency = Array.from(d3.rollup(new_data, 
+  monthlyFrequency = Array.from(d3.rollup(new_data,
     v => ({
-        frequency: v.length,
-        description: v.map(d => d.description)
-    }), 
+      frequency: v.length,
+      description: v.map(d => d.description)
+    }),
+    d => d.month
+  ), ([month, { frequency, description }]) => ({ month, frequency, description }));
+  monthlyFrequency.sort((a, b) => a.month - b.month);
+
+  shapeFrequency = Array.from(d3.rollup(new_data,
+    v => ({
+      frequency: v.length,
+      description: v.map(d => d.description)
+    }),
+    d => d.ufo_shape
+  ), ([shape, { frequency, description }]) => ({ shape, frequency, description }));
+  shapeFrequency.sort((a, b) => a.shape.localeCompare(b.shape));
+
+  timeOfDayFrequency = Array.from(d3.rollup(new_data,
+    v => ({
+      frequency: v.length,
+      description: v.map(d => d.description)
+    }),
+    d => getHourOfDay(d.date_time)
+  ), ([hour, { frequency, description }]) => ({ hour, frequency, description }));
+  timeOfDayFrequency.sort((a, b) => a.hour - b.hour);
+
+  encounterLengthFrequency = Array.from(d3.rollup(new_data,
+    v => ({
+      frequency: v.length,
+      description: v.map(d => d.description)
+    }),
     d => assignToBin(d.encounter_length)
-  ), ([bin, {frequency, description}]) => ({bin, frequency, description}));
+  ), ([bin, { frequency, description }]) => ({ bin, frequency, description }));
   encounterLengthFrequency.sort((a, b) => binRanges.findIndex(range => range.label === a.bin) - binRanges.findIndex(range => range.label === b.bin));
-  }
-  leafletMap.data = new_data;
+
 }
 
 function updateAllCharts() {
@@ -213,8 +217,7 @@ function updateAllCharts() {
   shapeBarChart.data = shapeFrequency;
   timeOfDayBarChart.data = timeOfDayFrequency;
   encounterLengthBarChart.data = encounterLengthFrequency;
-  leafletMap.updateVis();
-  leafletMap.updateColors(selectedOption);
+
   timeline.updateVis()
   monthBarChart.updateVis()
   shapeBarChart.updateVis()
