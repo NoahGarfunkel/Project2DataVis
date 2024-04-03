@@ -91,70 +91,58 @@ function ResetDataFilter() {
 }
 
 dispatcher.on('filterVisualizations', (selectedSpottings, visualization) => {
-  if (selectedSpottings.length == 0) {
-    ResetDataFilter();
+  if (selectedSpottings.length == 0){
+      ResetDataFilter();
   }
   else {
-    if (visualization === '#monthBarChart') {
-      shapeBarChart.resetBrush();
-      timeOfDayBarChart.resetBrush();
-      encounterLengthBarChart.resetBrush();
-      filteredDataByMonth = filteredData.filter(d => selectedSpottings.some(s => s.month === d.month));
-      timeline.data = Array.from(d3.rollup(filteredDataByMonth, v => v.length, d => d.year), ([year, frequency]) => ({ year, frequency })).sort((a, b) => a.year - b.year);
-      timeline.updateVis();
-      leafletMap.data = filteredDataByMonth;
-      leafletMap.updateVis();
-      leafletMap.updateColors(selectedOption);
-
-    }
-    else {
-        if (visualization === '#monthBarChart') {
-            shapeBarChart.resetBrush();
-            timeOfDayBarChart.resetBrush();
-            encounterLengthBarChart.resetBrush();
-            filteredDataByMonth = filteredData.filter(d => selectedSpottings.some(s => s.month === d.month));
-            setFrequencyData(filteredDataByMonth, visualization);
-            updateAllCharts();
-        }
-        if (visualization === '#shapeBarChart') {
-          monthBarChart.resetBrush();
+      if (visualization === '#monthBarChart') {
+          shapeBarChart.resetBrush();
           timeOfDayBarChart.resetBrush();
           encounterLengthBarChart.resetBrush();
-          filteredDataByShape = filteredData.filter(d => selectedSpottings.some(s => s.shape === d.ufo_shape));
-          setFrequencyData(filteredDataByShape, visualization);
+          filteredDataByMonth = filteredData.filter(d => selectedSpottings.some(s => s.month === d.month));
+          setFrequencyData(filteredDataByMonth, visualization);
           updateAllCharts();
-          
-        }
-        if (visualization === '#timeOfDayBarChart') {
-          monthBarChart.resetBrush();
-          shapeBarChart.resetBrush();
-          encounterLengthBarChart.resetBrush();
-          filteredDataByTime = filteredData.filter(d => selectedSpottings.some(s => s.hour === d.time));
-          setFrequencyData(filteredDataByTime, visualization);
-          updateAllCharts();
-        }
-
-        function getRangeFromBinLabel(binLabel) {
-          const bin = binRanges.find(b => b.label === binLabel);
-          if (!bin) return null; // Return null if no matching bin is found
-      
-          return { min: bin.min, max: bin.max };
+      }
+      if (visualization === '#shapeBarChart') {
+        monthBarChart.resetBrush();
+        timeOfDayBarChart.resetBrush();
+        encounterLengthBarChart.resetBrush();
+        filteredDataByShape = filteredData.filter(d => selectedSpottings.some(s => s.shape === d.ufo_shape));
+        setFrequencyData(filteredDataByShape, visualization);
+        updateAllCharts();
+        
+      }
+      if (visualization === '#timeOfDayBarChart') {
+        monthBarChart.resetBrush();
+        shapeBarChart.resetBrush();
+        encounterLengthBarChart.resetBrush();
+        filteredDataByTime = filteredData.filter(d => selectedSpottings.some(s => s.hour === d.time));
+        setFrequencyData(filteredDataByTime, visualization);
+        updateAllCharts();
       }
 
-        if (visualization === '#encounterLengthBarChart') {
-            monthBarChart.resetBrush();
-            shapeBarChart.resetBrush();
-            timeOfDayBarChart.resetBrush();
-            filteredDataByEncounterLength = filteredData.filter(d => {
-                return selectedSpottings.some(s => {
-                    const range = getRangeFromBinLabel(s.bin);
-                    if (!range) return false;
-                    return d.encounter_length >= range.min && (range.max === undefined || d.encounter_length < range.max);
-                });
-            });
-            setFrequencyData(filteredDataByEncounterLength, visualization);
-            updateAllCharts();
-        }
+      function getRangeFromBinLabel(binLabel) {
+        const bin = binRanges.find(b => b.label === binLabel);
+        if (!bin) return null; // Return null if no matching bin is found
+    
+        return { min: bin.min, max: bin.max };
+    }
+
+      if (visualization === '#encounterLengthBarChart') {
+          monthBarChart.resetBrush();
+          shapeBarChart.resetBrush();
+          timeOfDayBarChart.resetBrush();
+          filteredDataByEncounterLength = filteredData.filter(d => {
+              return selectedSpottings.some(s => {
+                  const range = getRangeFromBinLabel(s.bin);
+                  if (!range) return false;
+                  return d.encounter_length >= range.min && (range.max === undefined || d.encounter_length < range.max);
+              });
+          });
+          setFrequencyData(filteredDataByEncounterLength, visualization);
+          updateAllCharts();
+      }
+  }
 })
 
 // TODO: Check this out and maybe replace with setFrequencyData(data); updateAllCharts();
