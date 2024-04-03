@@ -95,3 +95,7 @@ button {
   flex: 2;
   background-color: #f4f0ec;
 }
+
+#timeline {
+  overflow: visible; 
+}

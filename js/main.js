@@ -59,7 +59,7 @@ d3.csv('data/ufo_sightings.csv')
     setFrequencyData(data);
 
     // initialize all charts
-    timeline = new TimeLine({ parentElement: '#timeline'}, yearlyFrequency);
+    timeline = new TimeLine({ parentElement: '#timeline'}, yearlyFrequency, dispatcher);
     monthBarChart = new BarchartCustomizable({ parentElement: "#monthBarChart", containerHeight: 400}, monthlyFrequency, "month", dispatcher, "Month");
     shapeBarChart = new BarchartCustomizable({ parentElement: "#shapeBarChart", containerHeight: 400}, shapeFrequency, "shape", dispatcher, "UFO Shape");    
     timeOfDayBarChart = new BarchartCustomizable({ parentElement: "#timeOfDayBarChart", containerHeight: 300 }, timeOfDayFrequency, "hour", dispatcher, "Hour");
