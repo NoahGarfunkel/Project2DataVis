@@ -131,6 +131,9 @@ class TimeLine {
       .attr('r', 4);
 
     vis.tooltip.append('text');
+
+
+    vis.inReset = false;
   }
 
 
@@ -192,11 +195,25 @@ class TimeLine {
     clearTimeout(vis.brushTimer);
 
     if (!selection) {
-      // If selection is null, reset the visualization and exit the method
-      vis.dispatcher.call('reset', vis.event);
+      this.highlighted.selectAll('.chart-line')
+        .data([])
+        .join('path')
+        .attr('class', 'chart-line')
+        .style('stroke', 'red')
+        .attr('d', this.line);
+      if (!vis.inReset){
+       
+        // If selection is null, reset the visualization and exit the method
+        vis.dispatcher.call('reset', vis.event);
+       
+      }
       return; // Exit the method early
     }
-
+    console.log("vis data before reset:");
+    console.log(vis.data);
+    vis.dispatcher.call('resetData', vis.event, vis.config.parentElement);
+    console.log("vis data after reset:");
+    console.log(vis.data);
     // distance between years
     const yearDist = vis.xScale(1) - vis.xScale(0)
     const selectionStart = selection[0] - yearDist;
@@ -225,14 +242,18 @@ class TimeLine {
       .style('stroke', 'red')
       .attr('d', vis.line);
   }
+
   resetBrush() {
+    this.inReset = true;
     this.brush.move(this.brushG, null);
     this.Brushed(null);
+    console.log("RESETTING HIGHLIGHTS")
     this.highlighted.selectAll('.chart-line')
       .data([])
       .join('path')
       .attr('class', 'chart-line')
       .style('stroke', 'red')
       .attr('d', this.line);
+    this.inReset= false;
   }
 }
