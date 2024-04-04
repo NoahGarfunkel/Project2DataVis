@@ -96,14 +96,14 @@ dispatcher.on('filterVisualizations', (selectedSpottings, visualization) => {
     ResetDataFilter();
   }
   if (visualization === '#timeline') {
-    shapeBarChart.resetBrush();
     monthBarChart.resetBrush();
+    shapeBarChart.resetBrush();
     timeOfDayBarChart.resetBrush();
     encounterLengthBarChart.resetBrush();
-    filteredDataByTimeline = filteredData.filter(d => selectedSpottings.some(s => s.year === d.year));
-    setFrequencyData(filteredDataByTimeline, visualization);
+    filteredDataByYear = filteredData.filter(d => selectedSpottings.some(s => s.year === d.year));
+    setFrequencyData(filteredDataByYear, visualization);
     updateAllCharts();
-}
+  }
   if (visualization === '#monthBarChart') {
     timeline.resetBrush();
     shapeBarChart.resetBrush();

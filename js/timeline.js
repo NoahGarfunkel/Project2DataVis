@@ -51,13 +51,6 @@ class TimeLine {
       .attr('width', vis.config.containerWidth)
       .attr('height', vis.config.containerHeight);
 
-    // vis.svg.append('text')
-    //     .attr('class', 'x-axis-label')
-    //     .attr('transform', translate(${vis.width / 2}, ${vis.height + vis.config.margin.bottom/ 1.25}))
-    //     .style('text-anchor', 'middle')
-    //     .text(vis.dataTypeLabels[vis.selectedDataType]);
-
-
     // Append group element that will contain our actual chart (see margin convention)
     vis.chart = vis.svg.append('g')
       .attr('transform', `translate(${vis.config.margin.left},${vis.config.margin.top})`);
@@ -74,40 +67,6 @@ class TimeLine {
     // We need to make sure that the tracking area is on top of other chart elements
     vis.marks = vis.chart.append('g');
     vis.highlighted = vis.chart.append('g');
-
-    vis.trackingArea = vis.chart.append('rect')
-      .attr('width', vis.width)
-      .attr('height', vis.height)
-      .attr('fill', 'none')
-      .attr('pointer-events', 'all');
-      
-    vis.trackingArea
-      .on('mouseenter', () => {
-        vis.tooltip.style('display', 'block');
-      })
-      .on('mouseleave', () => {
-        vis.tooltip.style('display', 'none');
-      })
-      .on('mousemove', function (event) {
-        // Get date that corresponds to current mouse x-coordinate
-        let xPos = d3.pointer(event, vis.svg.node())[0]; // First array element is x, second is y
-        let date = vis.xScale.invert(xPos);
-
-        // Find nearest data point
-        let index = vis.bisectDate(vis.data, date, 1);
-        let a = vis.data[index - 1];
-        let b = vis.data[index];
-        let d = b && (date - a.year > b.year - date) ? b : a;
-
-        // Update tooltip
-        vis.tooltip.select('circle')
-          .attr('transform', `translate(${vis.xScale(d.year)},${vis.yScale(d.frequency)})`);
-
-        vis.tooltip.select('text')
-          .attr('transform', `translate(${vis.xScale(d.year)},${(vis.yScale(d.frequency) - 15)})`)
-          .text(`${d.year}: ${Math.round(d.frequency)} Sightings`);
-      })
-    //(event,d) => {
 
     vis.selectedOption = document.getElementById('color_attr').selectedOptions[0];
 
@@ -133,6 +92,33 @@ class TimeLine {
     vis.brushG = vis.chart.append("g")
       .attr("class", "brush")
       .call(vis.brush);
+
+    vis.brushG
+      .on('mouseenter', () => {
+        vis.tooltip.style('display', 'block');
+      })
+      .on('mouseleave', () => {
+        vis.tooltip.style('display', 'none');
+      })
+      .on('mousemove', function (event) {
+        // Get date that corresponds to current mouse x-coordinate
+        let xPos = d3.pointer(event, vis.svg.node())[0] - 25; // First array element is x, second is y
+        let date = vis.xScale.invert(xPos);
+
+        // Find nearest data point
+        let index = vis.bisectDate(vis.data, date, 1);
+        let a = vis.data[index - 1];
+        let b = vis.data[index];
+        let d = b && (date - a.year > b.year - date) ? b : a;
+
+        // Update tooltip
+        vis.tooltip.select('circle')
+          .attr('transform', `translate(${vis.xScale(d.year)},${vis.yScale(d.frequency)})`);
+
+        vis.tooltip.select('text')
+          .attr('transform', `translate(${vis.xScale(d.year)},${(vis.yScale(d.frequency) - 15)})`)
+          .text(`${d.year}: ${Math.round(d.frequency)} Sightings`);
+      });
     vis.brushTimer = null;
     vis.brushG.call(vis.brush);
 
@@ -184,33 +170,6 @@ class TimeLine {
       .attr('class', 'chart-line')
       .attr('d', vis.line);
 
-    vis.trackingArea
-      .on('mouseenter', () => {
-        vis.tooltip.style('display', 'block');
-      })
-      .on('mouseleave', () => {
-        vis.tooltip.style('display', 'none');
-      })
-      .on('mousemove', function (event) {
-        // Get date that corresponds to current mouse x-coordinate
-        let xPos = d3.pointer(event, vis.svg.node())[0]; // First array element is x, second is y
-        let date = vis.xScale.invert(xPos);
-
-        // Find nearest data point
-        let index = vis.bisectDate(vis.data, date, 1);
-        let a = vis.data[index - 1];
-        let b = vis.data[index];
-        let d = b && (date - a.year > b.year - date) ? b : a;
-
-        // Update tooltip
-        vis.tooltip.select('circle')
-          .attr('transform', `translate(${vis.xScale(d.year)},${vis.yScale(d.frequency)})`);
-
-        vis.tooltip.select('text')
-          .attr('transform', `translate(${vis.xScale(d.year)},${(vis.yScale(d.frequency) - 15)})`)
-          .text(`${d.year}: ${Math.round(d.frequency)} Sightings`);
-      });
-
     // Update the axes
     vis.xAxisG.call(vis.xAxis);
     vis.yAxisG.call(vis.yAxis);
@@ -238,19 +197,15 @@ class TimeLine {
       return; // Exit the method early
     }
 
-    const selectionStart = selection[0];
-    const selectionEnd = selection[1];
+    // distance between years
+    const yearDist = vis.xScale(1) - vis.xScale(0)
+    const selectionStart = selection[0] - yearDist;
+    const selectionEnd = selection[1] + yearDist;
 
     const selectedData = vis.data.filter(d => {
       const xVal = vis.xScale(d.year);
-      //console.log(d.year);
-      //console.log(xVal);
       return xVal > selectionStart && xVal < selectionEnd;
     });
-
-
-    //console.log("SELECTED DATA");
-    //console.log(selectedData);
 
     // Dispatch the selected data
     vis.dispatcher.call('filterVisualizations', vis.event, selectedData, vis.config.parentElement);
@@ -269,7 +224,6 @@ class TimeLine {
       .attr('class', 'chart-line')
       .style('stroke', 'red')
       .attr('d', vis.line);
-
   }
   resetBrush() {
     this.brush.move(this.brushG, null);
