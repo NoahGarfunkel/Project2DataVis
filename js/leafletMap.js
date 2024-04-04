@@ -190,9 +190,10 @@ class LeafletMap {
       .attr("r", 3)
       .on('mouseover', function (event, d) { //function to add mouseover event
         d3.select(this).transition() //D3 selects the object we have moused over in order to perform operations on it
-          .duration('150') //how long we are transitioning between the two states (works like keyframes)
+          .duration('150')//how long we are transitioning between the two states (works like keyframes)
+          .attr('origfill', this.getAttribute('fill')) 
           .attr("fill", "red") //change the fill
-          .attr('r', 4); //change radius
+          .attr('r', 10); //change radius
 
         //create a tool tip
         d3.select('#tooltip')
@@ -214,8 +215,8 @@ class LeafletMap {
       })
       .on('mouseleave', function () { //function to add mouseover event
         d3.select(this).transition() //D3 selects the object we have moused over in order to perform operations on it
-          .duration('150') //how long we are transitioning between the two states (works like keyframes)
-          .attr("fill", "steelblue") //change the fill
+          .duration('150')//how long we are transitioning between the two states (works like keyframes)
+          .attr('fill', this.getAttribute('origfill')) 
           .attr('r', 3) //change radius
 
         d3.select('#tooltip').style('opacity', 0);//turn off the tooltip
@@ -224,9 +225,8 @@ class LeafletMap {
       vis.renderVis();
   }
 
-  updateColors(colorBy) {
+  getColorScale(){
     let vis = this;
-    vis.selectedData = colorBy;
 
     const ShapeScale = d3.scaleOrdinal(
       ["light", "circle", "triangle", "unknown", "sphere", "fireball", "changing", "chevron", "cigar", "cone",
@@ -237,7 +237,7 @@ class LeafletMap {
 
     // Define color scales based on the selected option
     let colorScale;
-    switch (colorBy) {
+    switch (vis.selectedData) {
       case 'year':
         colorScale = d3.scaleLinear()
           .domain(d3.extent(vis.data, d => d.year))
@@ -261,6 +261,13 @@ class LeafletMap {
           .domain(vis.data.map(d => d.defaultCategory))
           .range(['gray']); // Default color
     }
+    return colorScale;
+  }
+
+  updateColors(colorBy) {
+    let vis = this;
+    vis.selectedData = colorBy;
+    let colorScale = vis.getColorScale();
 
     // Update the fill color of the dots based on the selected option
     vis.Dots.attr("fill", d => colorScale(vis.getColorValue(d, colorBy)));
